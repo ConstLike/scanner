@@ -55,7 +55,7 @@ Run the scanner using `npx ts-node scanner.ts` with the following options:
 ✅ Detected languages: typescript, fortran
 🔧 Active scanners: typescript, fortran
 🔍 Full scan: traversing entire directory…
-➡️   Found 1321 source file(s) in 184.41 ms
+➡️  Found 1321 source file(s) in 184.41 ms
    • Processed 50/1321 files…
    • Processed 100/1321 files…
    • Processed 150/1321 files…
