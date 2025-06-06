@@ -1,12 +1,17 @@
-// language/index.ts
+/**
+ * @file language/index.ts
+ * @description Registry of language scanners and utility functions.
+ * @author Konstantin Komarov <constlike@gmail.com>
+ */
 
 import { LanguageScanner } from "../types/tags";
 import { TypeScriptScanner } from "./scanner_ts";
 import { FortranScanner } from "./scanner_fortran";
 
 /**
- * ALL_SCANNERS: map from language identifier → LanguageScanner instance.
- * Currently only "typescript" is registered. Future adapters can be added here.
+ * Map of language identifiers to their corresponding scanner instances.
+ *
+ * @constant
  */
 export const ALL_SCANNERS: { [lang: string]: LanguageScanner } = {
   typescript: new TypeScriptScanner(),
@@ -14,13 +19,14 @@ export const ALL_SCANNERS: { [lang: string]: LanguageScanner } = {
   // Once ready, add:
   // python: new PythonScanner(),
   // rust: new RustScanner(),
+  // lang: new LangScanner(),
 };
 
 /**
- * getActiveScanners(requestedLangs):
- *   If requestedLangs is null or empty, return all adapters (Object.values).
- *   Otherwise, for each lang in requestedLangs, return its adapter if exists.
- *   Warn if an adapter is not found.
+ * Retrieves the list of active scanners based on requested languages.
+ *
+ * @param requestedLangs - Array of language identifiers or null for all scanners.
+ * @returns Array of active LanguageScanner instances.
  */
 export function getActiveScanners(requestedLangs: string[] | null): LanguageScanner[] {
   if (!requestedLangs || requestedLangs.length === 0) {
@@ -39,9 +45,10 @@ export function getActiveScanners(requestedLangs: string[] | null): LanguageScan
 }
 
 /**
- * collectExtensions(scanners):
- *   Return a de-duplicated array of all extensions supported by these scanners.
- *   Lowercases everything to keep consistency.
+ * Collects a deduplicated list of supported extensions from the given scanners.
+ *
+ * @param scanners - Array of LanguageScanner instances.
+ * @returns Array of lowercase file extensions.
  */
 export function collectExtensions(scanners: LanguageScanner[]): string[] {
   const extSet = new Set<string>();

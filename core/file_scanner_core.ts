@@ -1,17 +1,22 @@
-// core/file_scanner_core.ts
+/**
+ * @file core/file_scanner_core.ts
+ * @description Core file scanner for recursively walking directories and applying ignore rules.
+ * @author Konstantin Komarov <constlike@gmail.com>
+ */
 
 import * as fs from "fs";
 import * as path from "path";
 import ignore from "ignore";
 
-///
-// ScannerOptions: configuration for the core file scanner.
-//
-// - rootDir: absolute project root or directory to scan.
-// - ignoreFiles: optional array of filenames (like ".gitignore", ".ignore") to read patterns from.
-// - extraIgnorePatterns: additional glob-ish patterns to ignore (e.g. "dist/", "**/*.log").
-// - extensions: if non-empty, only files whose extension (lowercased) appears here will be returned.
-///
+/**
+ * Configuration options for the core file scanner.
+ *
+ * @interface ScannerOptions
+ * @property {string} rootDir - Absolute project root or directory to scan.
+ * @property {string[]} [ignoreFiles] - Optional array of filenames (like ".gitignore", ".ignore") to read ignore patterns from.
+ * @property {string[]} [extraIgnorePatterns] - Additional glob-ish patterns to ignore (e.g., "dist/", "*.log").
+ * @property {string[]} [extensions] - If non-empty, only files with these extensions (lowercased) will be returned.
+ */
 export interface ScannerOptions {
   rootDir: string;
   ignoreFiles?: string[];
@@ -20,17 +25,23 @@ export interface ScannerOptions {
 }
 
 /**
- * FileScannerCore: recursively walks rootDir, applies ignore rules,
- * and returns a list of absolute file paths whose extensions match `opts.extensions`.
+ * Recursively walks the root directory, applies ignore rules, and returns a list of absolute file paths
+ * that match the specified extensions.
  *
- * Implementation notes:
- * - Uses the “ignore” library to parse .gitignore/.ignore exactly like Git does.
- * - Walks directories asynchronously to avoid blocking the event loop on large codebases.
- * - Immediately prunes ignored subdirectories to improve performance.
+ * This class uses the "ignore" library to parse .gitignore and .ignore files exactly like Git does.
+ * It walks directories asynchronously to avoid blocking the event loop on large codebases and
+ * immediately prunes ignored subdirectories to improve performance.
+ *
+ * @class FileScannerCore
  */
 export class FileScannerCore {
   private ig = ignore(); // “ignore” instance will hold all ignore patterns.
 
+  /**
+   * Creates a new FileScannerCore instance with the given options.
+   *
+   * @param opts - The configuration options for the scanner.
+   */
   constructor(private opts: ScannerOptions) {
     // 1. Load patterns from each ignore file (if it exists).
     const ignoreFiles = opts.ignoreFiles ?? [".gitignore", ".ignore"];
@@ -53,11 +64,12 @@ export class FileScannerCore {
   }
 
   /**
-   * scan():
-   *   Returns a Promise<string[]> containing all absolute file paths under rootDir
-   *   that:
-   *   1. do not match any ignore pattern (relative to rootDir)
-   *   2. if opts.extensions is non-empty, their extension (lowercase) appears in opts.extensions.
+   * Scans the directory and returns a list of absolute file paths that match the criteria.
+   *
+   * The returned files do not match any ignore patterns and, if extensions are specified,
+   * have extensions included in opts.extensions.
+   *
+   * @returns A promise that resolves to an array of absolute file paths.
    */
   public async scan(): Promise<string[]> {
     const result: string[] = [];
@@ -66,11 +78,11 @@ export class FileScannerCore {
   }
 
   /**
-   * walk(dir, out):
-   *   Internal helper that recursively reads `dir`.
-   *   If a relative path (file or directory) matches the ignore patterns, it prunes it immediately.
-   *   Otherwise, if it is a file with an allowed extension,
-   *   we push its absolute path into `out`.
+   * Recursively walks the directory and collects file paths that match the criteria.
+   *
+   * @private
+   * @param dir - The current directory to walk.
+   * @param out - The array to collect matching file paths.
    */
   private async walk(dir: string, out: string[]): Promise<void> {
     let entries: fs.Dirent[];

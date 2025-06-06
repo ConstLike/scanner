@@ -1,4 +1,8 @@
-// language/scanner_ts.ts
+/**
+ * @file language/scanner_ts.ts
+ * @description Language scanner implementation for TypeScript and JavaScript files.
+ * @author Konstantin Komarov <constlike@gmail.com>
+ */
 
 import * as fs from "fs";
 import * as path from "path";
@@ -8,33 +12,32 @@ import * as t from "@babel/types";
 import { LanguageScanner, ExtractedTag } from "../types/tags";
 
 /**
- * TypeScriptScanner: implements LanguageScanner for TypeScript/JavaScript.
- * 
- * Supported extensions: [".ts", ".tsx", ".js", ".jsx"].
- * 
- * Uses @babel/parser (plugins: typescript, jsx, classProperties, decorators-legacy, dynamicImport),
- * and @babel/traverse to find:
- *  - FunctionDeclaration
- *  - ArrowFunctionExpression / FunctionExpression assigned to a variable
- *  - VariableDeclaration (non-function initializers)
- *  - ClassDeclaration
- *  - TSTypeAliasDeclaration
- *  - TSInterfaceDeclaration
+ * Implements the LanguageScanner interface for TypeScript and JavaScript files.
+ *
+ * This scanner uses @babel/parser and @babel/traverse to extract tags from source files,
+ * supporting both TypeScript and JavaScript syntax, including JSX.
+ *
+ * @class TypeScriptScanner
+ * @implements {LanguageScanner}
  */
 export class TypeScriptScanner implements LanguageScanner {
   /**
-   * Return the list of file extensions (lowercase) supported by this adapter.
+   * Returns the list of file extensions supported by this scanner.
+   *
+   * @returns Array of supported extensions (lowercase).
    */
   supportedExtensions(): string[] {
     return [".ts", ".tsx", ".js", ".jsx"];
   }
 
   /**
-   * extractTags(filePath):
-   *  - Reads sourceCode as UTF-8.
-   *  - Parses with @babel/parser (TypeScript + JSX support).
-   *  - Traverses the AST collecting ExtractedTag entries.
-   *  - Returns [] if file is unparsable or contains no tags.
+   * Extracts tags from a TypeScript or JavaScript source file.
+   *
+   * Reads the file, parses it into an AST using @babel/parser, and traverses the AST to
+   * collect tags such as functions, variables, classes, types, and interfaces.
+   *
+   * @param filePath - Absolute path to the source file.
+   * @returns A promise resolving to an array of extracted tags, or an empty array if parsing fails.
    */
   async extractTags(filePath: string): Promise<ExtractedTag[]> {
     // 1. Quick extension check

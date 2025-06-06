@@ -1,8 +1,18 @@
-// types/tags.ts
+/**
+ * @file types/tags.ts
+ * @description Type definitions for extracted tags and language scanners.
+ * @author Konstantin Komarov <constlike@gmail.com>
+ */
 
 /**
- * ExtractedTag: represents a single “tag” (function, variable, class, type, interface, etc.)
- * found inside a source file.
+ * Represents a single tag extracted from a source file.
+ *
+ * @interface ExtractedTag
+ * @property {string} kind - The type of the tag (e.g., "function", "class").
+ * @property {string} name - The name of the tag.
+ * @property {number} startLine - The 1-based line number where the definition starts.
+ * @property {number} endLine - The 1-based line number where the definition ends.
+ * @property {string} code - The exact source snippet of the tag, trimmed.
  */
 export interface ExtractedTag {
   kind:
@@ -13,8 +23,7 @@ export interface ExtractedTag {
     | "interface"
     | "program"
     | "module"
-    | "subroutine"
-    | "undefined";
+    | "subroutine";
   name: string;
   startLine: number;   // 1-based line number where the definition starts
   endLine: number;     // 1-based line number where the definition ends
@@ -22,8 +31,12 @@ export interface ExtractedTag {
 }
 
 /**
- * ScopedFileContext: collects all tags extracted from one file,
- * plus the language identifier.
+ * Collects all tags extracted from a single file along with language metadata.
+ *
+ * @interface ScopedFileContext
+ * @property {string} filePath - Absolute path to the file.
+ * @property {string} language - Language identifier (e.g., "typescript").
+ * @property {ExtractedTag[]} tags - Array of extracted tags from the file.
  */
 export interface ScopedFileContext {
   filePath: string;    // absolute path
@@ -32,19 +45,23 @@ export interface ScopedFileContext {
 }
 
 /**
- * LanguageScanner: adapter interface for each language.
- * Each adapter must:
- *  1. report which file extensions it supports
- *  2. provide extractTags(filePath) that returns any tags found
+ * Defines the interface for language-specific scanners.
+ *
+ * @interface LanguageScanner
  */
 export interface LanguageScanner {
-  /** Return all lowercase extensions (including leading dot) that this scanner handles. */
+  /**
+   * Returns the list of supported file extensions.
+   *
+   * @returns Array of lowercase extensions (including leading dot).
+   */
   supportedExtensions(): string[];
 
   /**
-   * Given an absolute file path, parse it and return an array of ExtractedTag.
-   * If file is not of this language or contains no tags, return an empty array
-   * rather than throwing.
+   * Extracts tags from a given file.
+   *
+   * @param filePath - Absolute path to the file.
+   * @returns A promise resolving to an array of extracted tags.
    */
   extractTags(filePath: string): Promise<ExtractedTag[]>;
 }

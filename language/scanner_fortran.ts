@@ -1,4 +1,8 @@
-// language/scanner_fortran.ts
+/**
+ * @file language/scanner_fortran.ts
+ * @description Language scanner implementation for Fortran source files.
+ * @author Konstantin Komarov <constlike@gmail.com>
+ */
 
 import * as fs from "fs";
 import * as path from "path";
@@ -6,35 +10,25 @@ import { LanguageScanner, ExtractedTag } from "../types/tags";
 
 /**
  * Type representing the kinds of Fortran constructs that can be extracted.
+ *
+ * @typedef {string} FortranKind
  */
 type FortranKind = "program" | "module" | "subroutine" | "function" | "type";
 
 /**
- * FortranScanner: Implements LanguageScanner for Fortran source files.
+ * Implements the LanguageScanner interface for Fortran source files.
  *
- * This scanner supports a variety of Fortran file extensions and extracts tags for
- * key constructs such as programs, modules, subroutines, functions, and user-defined types.
- * It processes files in a single pass, handling both free-form and fixed-form syntax,
- * and accounts for nested constructs using a stack-based approach. Comments are
- * appropriately ignored in both formats.
+ * This scanner supports various Fortran file extensions and extracts tags for key constructs
+ * such as programs, modules, subroutines, functions, and user-defined types.
  *
- * Supported extensions (case-insensitive):
- *   - .f, .for, .f90, .f95, .f03, .f08, .fpp
- *   - .F, .FOR, .F90, .F95, .F03, .F08, .FPP
- *
- * Extracted constructs:
- *   - program
- *   - module
- *   - subroutine
- *   - function
- *   - type (user-defined types)
+ * @class FortranScanner
+ * @implements {LanguageScanner}
  */
 export class FortranScanner implements LanguageScanner {
   /**
    * Returns the list of file extensions supported by this scanner.
-   * Includes both lowercase and uppercase variants to account for case-sensitive file systems.
    *
-   * @returns Array of supported Fortran file extensions.
+   * @returns Array of supported Fortran file extensions (case-insensitive).
    */
   supportedExtensions(): string[] {
     return [
@@ -47,14 +41,11 @@ export class FortranScanner implements LanguageScanner {
   /**
    * Extracts tags from a Fortran source file.
    *
-   * This method reads the file, identifies Fortran constructs using regular expressions,
-   * and tracks their scope using a stack. It handles nested constructs and ignores
-   * comments (both full-line and inline). Each extracted tag includes the construct
-   * kind, name, start and end line numbers, and the corresponding code snippet.
+   * Processes the file in a single pass, handling both free-form and fixed-form syntax,
+   * and tracks nested constructs using a stack-based approach.
    *
    * @param filePath - Absolute path to the Fortran source file.
-   * @returns A promise resolving to an array of ExtractedTag objects,
-   *          or an empty array if the file is invalid or unreadable.
+   * @returns A promise resolving to an array of extracted tags, or an empty array if unreadable.
    */
   async extractTags(filePath: string): Promise<ExtractedTag[]> {
     // Validate file extension to ensure it matches supported Fortran extensions
@@ -83,7 +74,7 @@ export class FortranScanner implements LanguageScanner {
       { kind: "module", regex: /^\s*module\s+(\w+)/i },
       { kind: "subroutine", regex: /^\s*subroutine\s+(\w+)/i },
       { kind: "function", regex: /^\s*function\s+(\w+)/i },
-      { kind: "type", regex: /^\s*type\s+(\w+)/i }
+      { kind: "type", regex: /^\s*type\s+(\w+)/i },
     ];
 
     // Process each line of the file
@@ -108,7 +99,7 @@ export class FortranScanner implements LanguageScanner {
             kind: kind,
             name: match[1],
             startLine: i + 1, // Line numbers are 1-based
-            code: ""
+            code: "",
           };
           stack.push(newTag);
           break;

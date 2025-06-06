@@ -1,23 +1,20 @@
-// scanner.ts
-
 /**
- * Entry‐point for the universal code scanner.
+ * @file scanner.ts
+ * @description Entry-point for the universal code scanner.
+ * @author Konstantin Komarov <constlike@gmail.com>
  *
- * - Parses CLI flags:
- *   [positional rootDir]: e.g. `npx ts-node scanner.ts /path/to/project --lang auto`
- *   --root <path>         : explicitly specify project root
- *   --lang <list>       : comma-separated list of languages to activate (e.g. "typescript,python")
- *   --lang=auto         : shorthand for auto-detect mode
- *   --detect            : alias for auto-detect mode
- *   --update <file>     : paths (relative to root) to incrementally update
+ * This script parses CLI flags to scan a project directory for source files, extract tags
+ * using language-specific scanners, and generate a JSON index of the extracted tags.
  *
- * If neither --update nor --detect is specified, we do a full scan for whichever
- * languages the user requested. If --lang is omitted entirely, we default to “all”,
- * unless `--detect` forces auto-detection.
+ * Usage:
+ *   npx ts-node scanner.ts [rootDir] [options]
  *
- * In auto-detect, we first scan for any file matching *any* extension that any
- * adapter supports. Then we only activate adapters whose supportedExtensions()
- * actually appear in that pre-scan.
+ * Options:
+ *   --root <path>       : Explicitly specify the project root directory.
+ *   --lang <list>       : Comma-separated list of languages to activate (e.g., "typescript,python").
+ *   --lang=auto         : Auto-detect languages.
+ *   --detect, -d        : Alias for auto-detect mode.
+ *   --update <file>, -u : Paths (relative to root) to incrementally update (repeatable).
  */
 
 import * as fs from "fs";
@@ -30,12 +27,10 @@ import { ALL_SCANNERS, getActiveScanners, collectExtensions } from "./language";
 import { ScopedFileContext, LanguageScanner } from "./types/tags";
 
 /**
- * loadExistingIndex(rootDir):
- *   - Reads “scoping-tags.json” from the rootDir (if it exists).
- *   - Parses it into an array of ScopedFileContext objects.
- *   - If the file is missing or invalid, returns an empty array.
+ * Loads the existing index from "scoping-tags.json" in the root directory.
  *
- * This allows us to perform incremental updates by merging in new data.
+ * @param rootDir - The root directory of the project.
+ * @returns An array of ScopedFileContext objects, or an empty array if the file is missing or invalid.
  */
 function loadExistingIndex(rootDir: string): ScopedFileContext[] {
   const jsonPath = path.join(rootDir, "scoping-tags.json");
@@ -52,10 +47,10 @@ function loadExistingIndex(rootDir: string): ScopedFileContext[] {
 }
 
 /**
- * writeIndex(rootDir, contexts):
- *   - Serializes the array of ScopedFileContext objects as pretty-printed JSON.
- *   - Writes it to “scoping-tags.json” under rootDir.
- *   - Logs a confirmation message with the number of files in the index.
+ * Writes the array of ScopedFileContext objects to "scoping-tags.json" in the root directory.
+ *
+ * @param rootDir - The root directory of the project.
+ * @param contexts - The array of contexts to serialize.
  */
 function writeIndex(rootDir: string, contexts: ScopedFileContext[]) {
   const jsonPath = path.join(rootDir, "scoping-tags.json");
@@ -65,12 +60,10 @@ function writeIndex(rootDir: string, contexts: ScopedFileContext[]) {
 }
 
 /**
- * runFullScan(rootDir, scannerList):
- *   1. Collect combined extensions from all scanners.
- *   2. Initialize FileScannerCore with those extensions.
- *   3. Walk entire directory, get all candidate files.
- *   4. For each file in that list, invoke each LanguageScanner until one returns tags.
- *   5. Build an array of ScopedFileContext and write it out.
+ * Performs a full scan of the directory using the specified scanners.
+ *
+ * @param rootDir - The root directory to scan.
+ * @param scannerList - The list of active language scanners.
  */
 async function runFullScan(
   rootDir: string,
@@ -153,18 +146,14 @@ async function runFullScan(
 }
 
 /**
- * runIncrementalUpdate(rootDir, scannerList, updatePaths):
- *   1. Load existing scoping-tags.json into a Map<filePath, ScopedFileContext>.
- *   2. Collect all extensions supported by active scanners.
- *   3. For each path in updatePaths:
- *       a. Resolve to absolute path
- *       b. Check it exists and has a supported extension
- *       c. Invoke each LanguageScanner until one returns tags
- *       d. Replace or add entry in the Map
- *   4. Write updated Map.values() back to JSON.
+ * Performs an incremental update for the specified files.
  *
  * This enables a quick local update whenever a single file (or a few files) changes,
  * without re-parsing the entire project.
+ *
+ * @param rootDir - The root directory of the project.
+ * @param scannerList - The list of active language scanners.
+ * @param updatePaths - Array of file paths (relative to root) to update.
  */
 async function runIncrementalUpdate(
   rootDir: string,
@@ -238,13 +227,13 @@ async function runIncrementalUpdate(
 }
 
 /**
- * detectLanguages(rootDir):
- *   Auto-detect which languages are actually present by doing a quick scan for any file
- *   whose extension appears in ANY adapter’s supportedExtensions(). Then return the list
- *   of language keys for which at least one file was found.
+ * Detects languages present in the project by scanning for supported file extensions.
  *
- *   This does a minimal FileScannerCore scan with the union of all extensions, but does NOT
- *   parse AST. It simply collects the extensions of the found files.
+ * This does a minimal FileScannerCore scan with the union of all extensions, but does NOT
+ * parse AST. It simply collects the extensions of the found files.
+ *
+ * @param rootDir - The root directory to scan.
+ * @returns A promise resolving to an array of detected language keys.
  */
 async function detectLanguages(rootDir: string): Promise<string[]> {
   // 1) Gather all possible extensions from ALL_SCANNERS
@@ -307,9 +296,10 @@ async function detectLanguages(rootDir: string): Promise<string[]> {
 }
 
 /**
- * getScannerName(scanner):
- *   Helper to derive a lowercase language name from an adapter’s class name.
- *   E.g. TypeScriptScanner → "typescript".
+ * Derives a lowercase language name from a scanner's class name.
+ *
+ * @param scanner - The language scanner instance.
+ * @returns The derived language name (e.g., "typescript" from TypeScriptScanner Oldest trick in the book.
  */
 function getScannerName(scanner: LanguageScanner): string {
   const ctor = scanner.constructor as any;
@@ -318,25 +308,9 @@ function getScannerName(scanner: LanguageScanner): string {
 }
 
 /**
- * main():
- *  Entry point for the script.
+ * Main entry point for the code scanner script.
  *
- * Parses CLI flags:
- *   [positional rootDir]: e.g. `npx ts-node scanner.ts /path/to/project`
- *   --root <path>       : explicitly specify project root
- *   --lang <list>       : comma-separated list of languages to activate (e.g. "typescript,python")
- *   --lang=auto         : shorthand for auto‐detect mode
- *   --detect (alias -d) : switch to auto‐detect mode
- *   --update <file>     : repeatable; paths (relative to root) to incrementally update
- *
- * Workflow:
- *  1) Check if positional argument is provided (argv._). If so, treat it as `rootDir`
- *     unless `--root` is also provided (in which case `--root` takes precedence).
- *  2) Otherwise default to `process.cwd()`.
- *  3) If `--lang=auto` or `--detect`, run detectLanguages(rootDir).
- *  4) Otherwise if `--lang` was provided explicitly, split that into requestedLangs.
- *  5) Pass requestedLangs to getActiveScanners(). If none, exit with error.
- *  6) If `--update` is provided, run runIncrementalUpdate; otherwise run runFullScan.
+ * Parses command-line arguments and orchestrates the scanning process.
  */
 async function main() {
   // Parse CLI arguments using parseSync() for a synchronous result
