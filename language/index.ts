@@ -2,6 +2,7 @@
 
 import { LanguageScanner } from "../types/tags";
 import { TypeScriptScanner } from "./scanner_ts";
+import { FortranScanner } from "./scanner_fortran";
 
 /**
  * ALL_SCANNERS: map from language identifier → LanguageScanner instance.
@@ -9,9 +10,9 @@ import { TypeScriptScanner } from "./scanner_ts";
  */
 export const ALL_SCANNERS: { [lang: string]: LanguageScanner } = {
   typescript: new TypeScriptScanner(),
+  fortran: new FortranScanner(),
   // Once ready, add:
   // python: new PythonScanner(),
-  // fortran: new FortranScanner(),
   // rust: new RustScanner(),
 };
 

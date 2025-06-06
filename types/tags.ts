@@ -1,25 +1,34 @@
 // types/tags.ts
 
 /**
- * ExtractedTag: represents a single “tag” (function, variable, class, type, interface, etc.) 
+ * ExtractedTag: represents a single “tag” (function, variable, class, type, interface, etc.)
  * found inside a source file.
  */
 export interface ExtractedTag {
-  kind: "function" | "variable" | "class" | "type" | "interface";
+  kind:
+    | "function"
+    | "variable"
+    | "class"
+    | "type"
+    | "interface"
+    | "program"
+    | "module"
+    | "subroutine"
+    | "undefined";
   name: string;
-  startLine: number;
-  endLine: number;
-  code: string;
+  startLine: number;   // 1-based line number where the definition starts
+  endLine: number;     // 1-based line number where the definition ends
+  code: string;        // Exact source snippet (trimmed of leading/trailing whitespace)
 }
 
 /**
- * ScopedFileContext: collects all tags extracted from one file, 
+ * ScopedFileContext: collects all tags extracted from one file,
  * plus the language identifier.
  */
 export interface ScopedFileContext {
   filePath: string;    // absolute path
-  language: string;    // e.g. "typescript"
-  tags: ExtractedTag[]; 
+  language: string;    // e.g. "typescript", "fortran"
+  tags: ExtractedTag[];
 }
 
 /**

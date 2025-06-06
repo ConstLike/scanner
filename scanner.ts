@@ -22,6 +22,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { FileScannerCore } from "./core/file_scanner_core";
@@ -366,15 +367,28 @@ async function main() {
     .alias("help", "h")
     .parseSync();
 
-  // 1) Determine rootDir from positional argument or --root
-  let rootDir: string;
-  const positional = argv._.length > 0 ? String(argv._[0]) : "";
+  // 1) Determine rawRoot from positional argument or --root
+  let rawRoot: string;
   if (argv.root) {
-    rootDir = path.resolve(String(argv.root));
-  } else if (positional) {
-    rootDir = path.resolve(positional);
+    rawRoot = String(argv.root);
+  } else if (argv._.length > 0) {
+    rawRoot = String(argv._[0]);
   } else {
-    rootDir = process.cwd();
+    rawRoot = process.cwd();
+  }
+
+  // Expand "~" at the beginning (e.g. "~/foo/bar" → "/Users/you/foo/bar")
+  if (rawRoot.startsWith("~")) {
+    const home = os.homedir();
+    rawRoot = path.join(home, rawRoot.slice(1));
+  }
+
+  const rootDir = path.resolve(rawRoot);
+
+  // Verify that rootDir exists and is a directory
+  if (!fs.existsSync(rootDir) || !fs.statSync(rootDir).isDirectory()) {
+    console.error(`❌ The specified root directory does not exist or is not a directory: ${rootDir}`);
+    process.exit(1);
   }
 
   // 2) Determine active languages
