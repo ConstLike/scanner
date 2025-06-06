@@ -7,6 +7,6 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["scanner.ts"]
+  "include": ["scanner.ts", "core/**/*", "language/**/*", "types/**/*"]
 }
 
