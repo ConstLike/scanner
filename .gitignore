@@ -1,0 +1,33 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Build output
+dist/
+build/
+out/
+
+# VSCode settings (если используете VSCode)
+.vscode/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Mac system files
+.DS_Store
+
+# Optional: coverage and testing
+coverage/
+jest-coverage/
+
+# Optional: logs
+logs/
+*.log
+
