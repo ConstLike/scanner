@@ -7,7 +7,7 @@ import { TypeScriptScanner } from "./scanner_ts";
  * ALL_SCANNERS: map from language identifier → LanguageScanner instance.
  * Currently only "typescript" is registered. Future adapters can be added here.
  */
-const ALL_SCANNERS: { [lang: string]: LanguageScanner } = {
+export const ALL_SCANNERS: { [lang: string]: LanguageScanner } = {
   typescript: new TypeScriptScanner(),
   // Once ready, add:
   // python: new PythonScanner(),
