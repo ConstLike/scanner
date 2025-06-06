@@ -99,7 +99,6 @@ export class FortranScanner implements LanguageScanner {
             kind: kind,
             name: match[1],
             startLine: i + 1, // Line numbers are 1-based
-            code: "",
           };
           stack.push(newTag);
           break;
@@ -107,13 +106,19 @@ export class FortranScanner implements LanguageScanner {
       }
 
       // Check if the line ends a construct
-      if (/^\s*end\b/.test(codePart)) {
+      const endMatch = /^\s*end\s*(\w+)?/.exec(codePart);
+      if (endMatch) {
+        const endKind = endMatch[1];
         if (stack.length > 0) {
-          // Pop the tag from the stack, finalize it, and add to the tags list
-          const tag = stack.pop()!;
-          tag.endLine = i + 1;
-          tag.code = originalLines.slice(tag.startLine! - 1, i + 1).join("\n").trim();
-          tags.push(tag as ExtractedTag);
+          const topTag = stack[stack.length - 1];
+          if (!endKind || endKind.toLowerCase() === topTag.kind) {
+            // End the tag if it is just "END" or "END <type>" matches the type on the top of the stack
+            const tag = stack.pop()!;
+            tag.endLine = i + 1;
+            tag.code = originalLines.slice(tag.startLine! - 1, i + 1).join("\n").trim();
+            tags.push(tag as ExtractedTag);
+          }
+          // Otherwise, we ignore, for example, "END DO" for a subroutine
         }
       }
     }

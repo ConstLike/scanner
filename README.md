@@ -15,7 +15,7 @@
 To use Scanner, you need to have Node.js installed. Clone the repository and install the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/scanner.git
+git clone git@github.com:ConstLike/scanner.git
 cd scanner
 npm install
 ```
@@ -44,6 +44,47 @@ Run the scanner using `npx ts-node scanner.ts` with the following options:
   ```bash
   npx ts-node scanner.ts --update path/to/file.ts --update path/to/another/file.f90
   ```
+- **Scan with auto-detection of languages**:
+  ```bash
+  npx ts-node scanner.ts --root ~/CP2K --lang auto
+  ```
+**Expected output:**
+
+```plaintext
+🔎 Auto-detecting languages…
+✅ Detected languages: typescript, fortran
+🔧 Active scanners: typescript, fortran
+🔍 Full scan: traversing entire directory…
+➡️   Found 1321 source file(s) in 184.41 ms
+   • Processed 50/1321 files…
+   • Processed 100/1321 files…
+   • Processed 150/1321 files…
+   • Processed 200/1321 files…
+   • Processed 250/1321 files…
+   • Processed 300/1321 files…
+   • Processed 350/1321 files…
+   • Processed 400/1321 files…
+   • Processed 450/1321 files…
+   • Processed 500/1321 files…
+   • Processed 550/1321 files…
+   • Processed 600/1321 files…
+   • Processed 650/1321 files…
+   • Processed 700/1321 files…
+   • Processed 750/1321 files…
+   • Processed 800/1321 files…
+   • Processed 850/1321 files…
+   • Processed 900/1321 files…
+   • Processed 950/1321 files…
+   • Processed 1000/1321 files…
+   • Processed 1050/1321 files…
+   • Processed 1100/1321 files…
+   • Processed 1150/1321 files…
+   • Processed 1200/1321 files…
+   • Processed 1250/1321 files…
+   • Processed 1300/1321 files…
+✅ scoping-tags.json updated (1317 file entries).
+   ↳ File path: /Users/stan/CP2K/scoping-tags.json
+```
 
 ## Configuration
 
